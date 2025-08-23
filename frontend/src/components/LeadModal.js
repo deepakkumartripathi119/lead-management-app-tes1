@@ -46,10 +46,10 @@ export default function LeadModal({ isOpen, onClose, onSave, lead, token }) {
       const response = await fetch(url, {
         method,
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(formData),
+        credentials: 'include'
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to save lead");

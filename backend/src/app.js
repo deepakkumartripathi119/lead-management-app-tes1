@@ -1,14 +1,23 @@
 const express = require('express');
 const cors = require('cors');
+
+const cookieParser = require('cookie-parser');
 const authRoutes = require('./api/routes/auth.routes');
 const leadRoutes = require('./api/routes/leads.routes');
 
 const app = express();
 
 // Middleware
-app.use(cors()); // Enable Cross-Origin Resource Sharing
-app.use(express.json()); // Parse incoming JSON requests
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+
+app.use(cors({
+  origin: ['http://localhost:3000','http://192.168.0.107:3000'], // or use process.env.FRONTEND_URL
+  credentials: true, // allow cookies to be sent
+}));
+
+app.use(cookieParser());
+
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true })); 
 
 // API Routes
 app.use('/api/auth', authRoutes);

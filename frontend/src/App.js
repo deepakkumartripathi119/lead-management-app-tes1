@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import AuthPage from './components/AuthPage';
 import LeadsDashboard from './components/LeadsDashboard';
 
@@ -7,41 +7,59 @@ const API_URL = process.env.REACT_APP_API_URL;
 export default function App() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [sessionExpired, setSessionExpired] = useState(false);
+    const wasManualLogout = useRef(false);
 
     useEffect(() => {
         const verifyUserSession = async () => {
             try {
-                // The browser automatically sends the httpOnly cookie with this request
                 const response = await fetch(`${API_URL}/auth/me`, {
-                    credentials: 'include', // This is crucial for sending cookies
+                    credentials: 'include',
                 });
 
                 if (response.ok) {
                     const userData = await response.json();
                     setUser(userData);
                 } else {
-                    // If the response is not ok (e.g., 401), there's no valid session
                     setUser(null);
                 }
             } catch (error) {
-                // Network errors or other issues
                 console.error("Session verification failed:", error);
                 setUser(null);
             } finally {
-                // We're done checking, so stop loading
                 setLoading(false);
             }
         };
 
         verifyUserSession();
-    }, []); // The empty dependency array ensures this runs only once on app start
+    }, []);
+
+    // Periodically check session every 5 seconds to auto-logout on token expiry or cookie deletion
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetch(`${API_URL}/auth/me`, { credentials: 'include' })
+                .then(res => {
+                    if (!res.ok) {
+                        setUser(null);
+                        if (!wasManualLogout.current) setSessionExpired(true);
+                    }
+                })
+                .catch(() => {
+                    setUser(null);
+                    if (!wasManualLogout.current) setSessionExpired(true);
+                });
+        }, 5000);
+        return () => clearInterval(interval);
+    }, []);
 
     const handleLogin = (loggedInUser) => {
         setUser(loggedInUser);
+        setSessionExpired(false);
     };
 
     const handleLogout = async () => {
         try {
+            wasManualLogout.current = true;
             // Call the backend endpoint that clears the httpOnly cookie
             await fetch(`${API_URL}/auth/logout`, {
                 method: 'POST',
@@ -52,6 +70,8 @@ export default function App() {
         } finally {
             // Always clear the user state on the frontend
             setUser(null);
+            setSessionExpired(false);
+            setTimeout(() => { wasManualLogout.current = false; }, 2000); // reset after a short delay
         }
     };
 
@@ -65,7 +85,7 @@ export default function App() {
             {user ? (
                 <LeadsDashboard user={user} onLogout={handleLogout} />
             ) : (
-                <AuthPage onLogin={handleLogin} />
+                <AuthPage onLogin={handleLogin} sessionExpired={sessionExpired} />
             )}
         </div>
     );
