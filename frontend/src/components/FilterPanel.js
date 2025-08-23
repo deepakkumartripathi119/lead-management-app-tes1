@@ -20,27 +20,18 @@ const FilterPanel = ({ filters, onFiltersChange, onApplyFilters, onClearFilters 
 
   const handleClear = () => {
     const clearedFilters = {
-      // String fields with equals/contains
-      email: { equals: '', contains: '' },
-      company: { equals: '', contains: '' },
-      city: { equals: '', contains: '' },
-      first_name: { equals: '', contains: '' },
-      last_name: { equals: '', contains: '' },
-      
-      // Enum fields with equals/in
-      status: { equals: '', in: [] },
-      source: { equals: '', in: [] },
-      
-      // Number fields with equals/gt/lt/between
-      score: { equals: '', gt: '', lt: '', between_min: '', between_max: '' },
-      lead_value: { equals: '', gt: '', lt: '', between_min: '', between_max: '' },
-      
-      // Date fields with on/before/after/between
-      created_at: { on: '', before: '', after: '', between_start: '', between_end: '' },
-      last_activity_at: { on: '', before: '', after: '', between_start: '', between_end: '' },
-      
-      // Boolean field
-      is_qualified: { equals: '' }
+  email: { equals: '', contains: '' },
+  company: { equals: '', contains: '' },
+  city: { equals: '', contains: '' },
+  first_name: { equals: '', contains: '' },
+  last_name: { equals: '', contains: '' },
+  status: { equals: '', in: [] },
+  source: { equals: '', in: [] },
+  score: { equals: '', gt: '', lt: '', between_min: '', between_max: '' },
+  lead_value: { equals: '', gt: '', lt: '', between_min: '', between_max: '' },
+  created_at: { on: '', before: '', after: '', between_start: '', between_end: '' },
+  last_activity_at: { on: '', before: '', after: '', between_start: '', between_end: '' },
+  is_qualified: { equals: '' }
     };
     
     setLocalFilters(clearedFilters);

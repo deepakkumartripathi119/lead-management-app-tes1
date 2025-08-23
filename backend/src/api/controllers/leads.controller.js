@@ -1,6 +1,5 @@
 const Lead = require('../models/lead.model');
 
-// Get all leads with filtering, sorting, and pagination
 exports.getAllLeads = async (req, res) => {
     try {
         let { page = 1, limit = 20 } = req.query;
@@ -8,7 +7,6 @@ exports.getAllLeads = async (req, res) => {
         limit = Math.min(parseInt(limit) || 20, 100);
 
 
-        // Parse filters from JSON string in 'filters' param
         const query = {};
         const opMap = {
             equals: v => v,
@@ -37,20 +35,16 @@ exports.getAllLeads = async (req, res) => {
             for (const [field, ops] of Object.entries(filters)) {
                 for (const [op, value] of Object.entries(ops)) {
                     if (value === '' || value === undefined || value === null || (Array.isArray(value) && value.length === 0)) continue;
-                    // Boolean field
                     if (field === 'is_qualified' && op === 'equals') {
                         query[field] = value === true || value === 'true';
                     } else if (op === 'between') {
-                        // For numbers and dates
                         if (field === 'score' || field === 'lead_value') {
-                            // Number between
                             const min = Number(ops.between_min);
                             const max = Number(ops.between_max);
                             if (!isNaN(min) && !isNaN(max)) {
                                 query[field] = { $gte: min, $lte: max };
                             }
                         } else if (field === 'created_at' || field === 'last_activity_at') {
-                            // Date between
                             const start = ops.between_start;
                             const end = ops.between_end;
                             if (start && end) {

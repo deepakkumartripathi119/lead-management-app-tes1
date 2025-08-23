@@ -34,7 +34,6 @@ export default function App() {
         verifyUserSession();
     }, []);
 
-    // Periodically check session every 5 seconds to auto-logout on token expiry or cookie deletion
     useEffect(() => {
         const interval = setInterval(() => {
             fetch(`${API_URL}/auth/me`, { credentials: 'include' })

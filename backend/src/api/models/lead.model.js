@@ -13,7 +13,7 @@ const leadSchema = new mongoose.Schema({
         type: String, 
         required: true, 
         enum: ['new', 'contacted', 'qualified', 'lost', 'won'],
-        default: 'new' 
+    default: 'new' 
     },
     score: { type: Number,required: true,  default: 0, min: 0, max: 100 },
     lead_value: { type: Number,required: true,  default: 0, min: 0 },

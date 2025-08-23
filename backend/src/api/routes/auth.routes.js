@@ -1,6 +1,5 @@
 
 const cookieParser = require('cookie-parser');
-// Make sure cookieParser is used in your main app.js (not here)
 
 const express = require('express');
 const router = express.Router();

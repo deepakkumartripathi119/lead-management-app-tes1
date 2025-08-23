@@ -7,7 +7,6 @@ const leadRoutes = require('./api/routes/leads.routes.js');
 
 const app = express();
 
-// Middleware
 
 app.use(cors({
   origin: ['http://localhost:3000','http://192.168.0.107:3000'], // or use process.env.FRONTEND_URL

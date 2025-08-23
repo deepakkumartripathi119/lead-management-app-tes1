@@ -9,6 +9,7 @@ const API_URL = process.env.REACT_APP_API_URL;
 export default function LeadsDashboard({ user, onLogout }) {
   const gridRef = useRef();
   const [rowData, setRowData] = useState([]);
+  const [allLeads, setAllLeads] = useState([]);
   const [pagination, setPagination] = useState({
     total: 0,
     page: 1,
@@ -16,7 +17,6 @@ export default function LeadsDashboard({ user, onLogout }) {
     totalPages: 1
   });
   
-  // Comprehensive filters with operators
   const [filters, setFilters] = useState({
     // String fields with equals/contains
     email: { equals: '', contains: '' },
@@ -48,7 +48,6 @@ export default function LeadsDashboard({ user, onLogout }) {
   const [loading, setLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Build query parameters for server-side filtering
   const buildFilterParams = useCallback(() => {
     const params = new URLSearchParams();
     
@@ -76,42 +75,29 @@ export default function LeadsDashboard({ user, onLogout }) {
     return params;
   }, [filters]);
 
-  const fetchLeads = useCallback(async (page = 1) => {
+
+  const fetchAllLeads = useCallback(async () => {
     setLoading(true);
     try {
-      const queryParams = new URLSearchParams({
-        page: page.toString(),
-        limit: pagination.limit.toString()
+      const response = await fetch(`${API_URL}/leads?page=1&limit=10000`, {
+        credentials: 'include'
       });
-
-      // Add filter parameters
-      const filterParams = buildFilterParams();
-      filterParams.forEach((value, key) => {
-        queryParams.append(key, value);
-      });
-
-      const response = await fetch(`${API_URL}/leads?${queryParams}`, {
-        credentials: 'include' // httpOnly cookies
-      });
-
       if (response.status === 401) {
         onLogout();
         return;
       }
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const data = await response.json();
-      
-      // Handle different response formats
-      setRowData(data.data || data.leads || []);
+      const leads = data.data || data.leads || [];
+      setAllLeads(leads);
+      setRowData(leads);
       setPagination({
-        total: data.total || data.totalLeads || 0,
-        page: data.page || data.currentPage || page,
-        limit: data.limit || 20,
-        totalPages: data.totalPages || Math.ceil((data.total || 0) / (data.limit || 20))
+        total: leads.length,
+        page: 1,
+        limit: pagination.limit,
+        totalPages: Math.ceil(leads.length / pagination.limit)
       });
     } catch (error) {
       console.error("Fetch leads error:", error);
@@ -121,51 +107,125 @@ export default function LeadsDashboard({ user, onLogout }) {
     } finally {
       setLoading(false);
     }
-  }, [filters, pagination.limit, onLogout, buildFilterParams]);
+  }, [onLogout, pagination.limit]);
+
+  const applyFrontendFilters = useCallback(() => {
+    let filtered = allLeads;
+    Object.entries(filters).forEach(([field, ops]) => {
+      Object.entries(ops).forEach(([op, value]) => {
+        if (value === '' || value === undefined || value === null || (Array.isArray(value) && value.length === 0)) return;
+        // String fields
+        if (["email","company","city","first_name","last_name"].includes(field)) {
+          if (op === 'equals') filtered = filtered.filter(l => (l[field] || '') === value);
+          if (op === 'contains') filtered = filtered.filter(l => (l[field] || '').toLowerCase().includes(value.toLowerCase()));
+        }
+        // Enum fields
+        if (["status","source"].includes(field)) {
+          if (op === 'equals') filtered = filtered.filter(l => l[field] === value);
+          if (op === 'in') filtered = filtered.filter(l => Array.isArray(value) ? value.includes(l[field]) : (value || '').split(',').includes(l[field]));
+        }
+        // Number fields
+        if (["score","lead_value"].includes(field)) {
+          const num = l => Number(l[field]);
+          if (op === 'equals') filtered = filtered.filter(l => num(l) === Number(value));
+          if (op === 'gt') filtered = filtered.filter(l => num(l) > Number(value));
+          if (op === 'lt') filtered = filtered.filter(l => num(l) < Number(value));
+          if (op === 'between') {
+            const min = Number(ops.between_min);
+            const max = Number(ops.between_max);
+            if (!isNaN(min) && !isNaN(max)) filtered = filtered.filter(l => num(l) >= min && num(l) <= max);
+          }
+        }
+        // Date fields
+        if (["created_at","last_activity_at"].includes(field)) {
+          const dateVal = l => new Date(l[field]);
+          if (op === 'on') {
+            const d = new Date(value);
+            filtered = filtered.filter(l => {
+              const dt = dateVal(l);
+              return dt.toDateString() === d.toDateString();
+            });
+          }
+          if (op === 'before') filtered = filtered.filter(l => dateVal(l) < new Date(value));
+          if (op === 'after') filtered = filtered.filter(l => dateVal(l) > new Date(value));
+          if (op === 'between') {
+            const start = new Date(ops.between_start);
+            const end = new Date(ops.between_end);
+            filtered = filtered.filter(l => dateVal(l) >= start && dateVal(l) <= end);
+          }
+        }
+        // Boolean field
+        if (field === 'is_qualified' && op === 'equals') {
+          filtered = filtered.filter(l => String(l[field]) === String(value));
+        }
+      });
+    });
+    setRowData(filtered);
+    setPagination(p => ({
+      ...p,
+      total: filtered.length,
+      page: 1,
+      totalPages: Math.ceil(filtered.length / p.limit)
+    }));
+  }, [allLeads, filters]);
+
 
   useEffect(() => {
-    fetchLeads(1);
-  }, [fetchLeads]);
+    fetchAllLeads();
+  }, [fetchAllLeads]);
+
+  useEffect(() => {
+    applyFrontendFilters();
+  }, [filters, allLeads, applyFrontendFilters]);
 
   const handleFiltersChange = (newFilters) => {
     setFilters(newFilters);
   };
 
   const handleApplyFilters = () => {
-    fetchLeads(1); // Reset to first page when applying filters
+  setShowFilters(false);
   };
 
   const handleClearFilters = () => {
-    fetchLeads(1); // Refetch with cleared filters
+    setFilters({
+      email: { equals: '', contains: '' },
+      company: { equals: '', contains: '' },
+      city: { equals: '', contains: '' },
+      first_name: { equals: '', contains: '' },
+      last_name: { equals: '', contains: '' },
+      status: { equals: '', in: [] },
+      source: { equals: '', in: [] },
+      score: { equals: '', gt: '', lt: '', between_min: '', between_max: '' },
+      lead_value: { equals: '', gt: '', lt: '', between_min: '', between_max: '' },
+      created_at: { on: '', before: '', after: '', between_start: '', between_end: '' },
+      last_activity_at: { on: '', before: '', after: '', between_start: '', between_end: '' },
+      is_qualified: { equals: '' }
+    });
   };
 
   const handleSaveLead = () => {
     setIsLeadModalOpen(false);
     setEditingLead(null);
-    fetchLeads(pagination.page);
+    fetchAllLeads();
   };
 
   const confirmDeleteLead = async () => {
     if (!leadToDelete) return;
-
     try {
       const response = await fetch(`${API_URL}/leads/${leadToDelete._id}`, {
         method: 'DELETE',
         credentials: 'include'
       });
-
       if (response.status === 401) {
         onLogout();
         return;
       }
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       setIsDeleteModalOpen(false);
       setLeadToDelete(null);
-      fetchLeads(pagination.page);
+      fetchAllLeads();
     } catch (error) {
       console.error("Delete error:", error);
       if (error.message.includes('401')) {
@@ -259,7 +319,7 @@ export default function LeadsDashboard({ user, onLogout }) {
   ];
 
   const handlePageChange = (newPage) => {
-    fetchLeads(newPage);
+    setPagination(p => ({ ...p, page: newPage }));
   };
 
   return (

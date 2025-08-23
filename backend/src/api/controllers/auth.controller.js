@@ -2,7 +2,6 @@ const User = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-// Logout user (clear cookie)
 exports.logout = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
@@ -14,7 +13,6 @@ exports.logout = (req, res) => {
   });
   res.json({ message: "Logged out successfully" });
 };
-// Get current user from JWT in cookie
 exports.me = async (req, res) => {
   try {
     const token = req.cookies.token;
@@ -32,14 +30,12 @@ exports.me = async (req, res) => {
   }
 };
 
-// Generate JWT Token
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: "1h", // Token expires in 1hour
+  expiresIn: "1h",
   });
 };
 
-// Register new user
 exports.register = async (req, res) => {
   try {
     const { email, password } = req.body;

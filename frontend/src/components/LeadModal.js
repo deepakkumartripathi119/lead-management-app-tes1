@@ -66,9 +66,7 @@ export default function LeadModal({ isOpen, onClose, onSave, lead, token }) {
       <div className="modal-content">
         <div className="modal-header">
           <h3>{lead ? "Edit Lead" : "Create New Lead"}</h3>
-          <button className="btn-close" onClick={onClose}>
-            &times;
-          </button>
+          <button className="btn-close" onClick={onClose}>&times;</button>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="modal-body">
@@ -100,7 +98,7 @@ export default function LeadModal({ isOpen, onClose, onSave, lead, token }) {
                   name="last_name"
                   className="form-control"
                   value={formData.last_name}
-                  onChange={handleChange}
+            
                   required
                 />
               </div>
@@ -131,7 +129,7 @@ export default function LeadModal({ isOpen, onClose, onSave, lead, token }) {
                   id="phone"
                   name="phone"
                   className="form-control"
-                  value={formData.phone}
+            
                   onChange={handleChange}
                 />
               </div>
@@ -161,7 +159,7 @@ export default function LeadModal({ isOpen, onClose, onSave, lead, token }) {
                   id="city"
                   name="city"
                   className="form-control"
-                  value={formData.city}
+            
                   onChange={handleChange}
                 />
               </div>
@@ -199,7 +197,7 @@ export default function LeadModal({ isOpen, onClose, onSave, lead, token }) {
                   <option value="facebook_ads">Facebook Ads</option>
                   <option value="google_ads">Google Ads</option>
                   <option value="referral">Referral</option>
-                  <option value="events">Events</option>
+            
                   <option value="other">Other</option>
                 </select>
               </div>
@@ -237,7 +235,7 @@ export default function LeadModal({ isOpen, onClose, onSave, lead, token }) {
                   className="form-control"
                   min="0"
                   max="100"
-                  value={formData.score}
+            
                   onChange={handleChange}
                 />
               </div>

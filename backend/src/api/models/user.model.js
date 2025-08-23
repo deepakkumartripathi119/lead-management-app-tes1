@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
         required: [true, 'Password is required'] 
     },
 }, { 
-    timestamps: true // Automatically adds createdAt and updatedAt fields
+    timestamps: true
 });
 
 module.exports = mongoose.model('User', userSchema);

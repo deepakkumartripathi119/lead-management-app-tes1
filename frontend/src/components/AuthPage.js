@@ -21,16 +21,14 @@ export default function AuthPage({ onLogin }) {
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // Critical for httpOnly cookies
+  credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
 
       if (response.status === 200) {
-        // Success - JWT is now stored in httpOnly cookie
         const userData = await response.json();
         onLogin(userData); // Pass user data only, no token
       } else {
-        // Handle different error cases
         const data = await response.json();
         if (response.status === 401) {
           setError('Invalid email or password');
@@ -40,7 +38,7 @@ export default function AuthPage({ onLogin }) {
       }
     } catch (err) {
       setError('Network error. Please try again.');
-      console.error('Login error:', err);
+  console.error('Login error:', err);
     } finally {
       setLoading(false);
     }
