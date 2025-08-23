@@ -2,8 +2,8 @@ const express = require('express');
 const cors = require('cors');
 
 const cookieParser = require('cookie-parser');
-const authRoutes = require('./api/routes/auth.routes');
-const leadRoutes = require('./api/routes/leads.routes');
+const authRoutes = require('./api/routes/auth.routes.js');
+const leadRoutes = require('./api/routes/leads.routes.js');
 
 const app = express();
 
