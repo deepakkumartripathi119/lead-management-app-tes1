@@ -1,19 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const leadsController = require('../controllers/leads.controller');
+const leadsCtrl = require('../controllers/leads.controller');
+const auth = require('../middleware/authMiddleware');
 
-const authMiddleware = require('../middleware/authMiddleware');
-
-// Protect all lead routes
-router.use(authMiddleware);
+router.use(auth);
 
 router.route('/')
-    .get(leadsController.getAllLeads)
-    .post(leadsController.createLead);
+    .get(leadsCtrl.getAllLeads)
+    .post(leadsCtrl.createLead);
 
 router.route('/:id')
-    .get(leadsController.getLeadById)
-    .put(leadsController.updateLead)
-    .delete(leadsController.deleteLead);
+    .get(leadsCtrl.getLeadById)
+    .put(leadsCtrl.updateLead)
+    .delete(leadsCtrl.deleteLead);
 
 module.exports = router;

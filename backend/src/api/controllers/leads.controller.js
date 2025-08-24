@@ -6,7 +6,6 @@ exports.getAllLeads = async (req, res) => {
         page = parseInt(page) || 1;
         limit = Math.min(parseInt(limit) || 20, 100);
 
-
         const query = {};
         const opMap = {
             equals: v => v,
@@ -52,26 +51,19 @@ exports.getAllLeads = async (req, res) => {
                             }
                         }
                     } else if (op === 'on' && (field === 'created_at' || field === 'last_activity_at')) {
-                        // Date on
                         const date = new Date(value);
                         const start = new Date(date.setHours(0,0,0,0));
                         const end = new Date(date.setHours(23,59,59,999));
                         query[field] = { $gte: start, $lte: end };
                     } else if ((op === 'before' || op === 'after') && (field === 'created_at' || field === 'last_activity_at')) {
-                        // Date before/after
                         query[field] = opMap[op](value);
                     } else if (op === 'in') {
-                        // Enum in
                         query[field] = opMap[op](value);
                     } else if (op === 'contains' || op === 'equals' || op === 'gt' || op === 'lt') {
-                        // String, enum, number
                         if (!query[field]) query[field] = {};
                         if (op === 'equals') {
-                            // For enums and numbers, just set value
                             if (field === 'score' || field === 'lead_value') {
                                 query[field] = Number(value);
-                            } else if (field === 'status' || field === 'source') {
-                                query[field] = value;
                             } else {
                                 query[field] = value;
                             }

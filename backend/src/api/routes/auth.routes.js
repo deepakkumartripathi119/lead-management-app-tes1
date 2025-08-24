@@ -1,16 +1,10 @@
-
-
-
 const express = require('express');
 const router = express.Router();
-const authController = require('../controllers/auth.controller');
-const jwt = require('jsonwebtoken');
-const cookieParser = require('cookie-parser');
+const authCtrl = require('../controllers/auth.controller');
 
-router.get('/me', authController.me);
-router.post('/register', authController.register);
-
-router.post('/login', authController.login);
-router.post('/logout', authController.logout);
+router.get('/me', authCtrl.me);
+router.post('/register', authCtrl.register);
+router.post('/login', authCtrl.login);
+router.post('/logout', authCtrl.logout);
 
 module.exports = router;

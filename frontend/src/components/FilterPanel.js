@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 
+
 const FilterPanel = ({ filters, onFiltersChange, onApplyFilters, onClearFilters }) => {
   const [localFilters, setLocalFilters] = useState(filters);
 
-  const handleFilterChange = (field, operator, value) => {
+  function handleFilterChange(field, operator, value) {
     setLocalFilters(prev => ({
       ...prev,
       [field]: {
@@ -11,33 +12,32 @@ const FilterPanel = ({ filters, onFiltersChange, onApplyFilters, onClearFilters 
         [operator]: value
       }
     }));
-  };
+  }
 
-  const handleApply = () => {
+  function handleApply() {
     onFiltersChange(localFilters);
     onApplyFilters();
-  };
+  }
 
-  const handleClear = () => {
-    const clearedFilters = {
-  email: { equals: '', contains: '' },
-  company: { equals: '', contains: '' },
-  city: { equals: '', contains: '' },
-  first_name: { equals: '', contains: '' },
-  last_name: { equals: '', contains: '' },
-  status: { equals: '', in: [] },
-  source: { equals: '', in: [] },
-  score: { equals: '', gt: '', lt: '', between_min: '', between_max: '' },
-  lead_value: { equals: '', gt: '', lt: '', between_min: '', between_max: '' },
-  created_at: { on: '', before: '', after: '', between_start: '', between_end: '' },
-  last_activity_at: { on: '', before: '', after: '', between_start: '', between_end: '' },
-  is_qualified: { equals: '' }
+  function handleClear() {
+    const cleared = {
+      email: { equals: '', contains: '' },
+      company: { equals: '', contains: '' },
+      city: { equals: '', contains: '' },
+      first_name: { equals: '', contains: '' },
+      last_name: { equals: '', contains: '' },
+      status: { equals: '', in: [] },
+      source: { equals: '', in: [] },
+      score: { equals: '', gt: '', lt: '', between_min: '', between_max: '' },
+      lead_value: { equals: '', gt: '', lt: '', between_min: '', between_max: '' },
+      created_at: { on: '', before: '', after: '', between_start: '', between_end: '' },
+      last_activity_at: { on: '', before: '', after: '', between_start: '', between_end: '' },
+      is_qualified: { equals: '' }
     };
-    
-    setLocalFilters(clearedFilters);
-    onFiltersChange(clearedFilters);
+    setLocalFilters(cleared);
+    onFiltersChange(cleared);
     onClearFilters();
-  };
+  }
 
   return (
     <div className="filters-panel">

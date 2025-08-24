@@ -2,7 +2,6 @@ import React from 'react';
 
 export default function DeleteModal({ isOpen, onClose, onConfirm }) {
     if (!isOpen) return null;
-
     return (
         <div className="modal">
             <div className="modal-content modal-content--sm">

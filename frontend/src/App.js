@@ -4,33 +4,28 @@ import LeadsDashboard from './components/LeadsDashboard';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
-export default function App() {
+function App() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [sessionExpired, setSessionExpired] = useState(false);
     const wasManualLogout = useRef(false);
 
     useEffect(() => {
-        const verifyUserSession = async () => {
+        async function verifyUserSession() {
             try {
-                const response = await fetch(`${API_URL}/auth/me`, {
-                    credentials: 'include',
-                });
-
-                if (response.ok) {
-                    const userData = await response.json();
+                const res = await fetch(`${API_URL}/auth/me`, { credentials: 'include' });
+                if (res.ok) {
+                    const userData = await res.json();
                     setUser(userData);
                 } else {
                     setUser(null);
                 }
-            } catch (error) {
-                console.error("Session verification failed:", error);
+            } catch (err) {
                 setUser(null);
             } finally {
                 setLoading(false);
             }
-        };
-
+        }
         verifyUserSession();
     }, []);
 
@@ -59,25 +54,20 @@ export default function App() {
     const handleLogout = async () => {
         try {
             wasManualLogout.current = true;
-            // Call the backend endpoint that clears the httpOnly cookie
             await fetch(`${API_URL}/auth/logout`, {
                 method: 'POST',
                 credentials: 'include',
             });
-        } catch (error) {
-            console.error("Logout failed:", error);
+        } catch (err) {
+            // ignore
         } finally {
-            // Always clear the user state on the frontend
             setUser(null);
             setSessionExpired(false);
-            setTimeout(() => { wasManualLogout.current = false; }, 2000); // reset after a short delay
+            setTimeout(() => { wasManualLogout.current = false; }, 2000);
         }
     };
 
-    // Display a loading message while the app verifies the user's session
-    if (loading) {
-        return <div>Loading application...</div>;
-    }
+    if (loading) return <div>Loading application...</div>;
 
     return (
         <div>
@@ -89,3 +79,5 @@ export default function App() {
         </div>
     );
 }
+
+export default App;

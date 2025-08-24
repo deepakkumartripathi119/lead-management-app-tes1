@@ -1,7 +1,6 @@
-// backend/src/api/middleware/authMiddleware.js
 const jwt = require('jsonwebtoken');
 
-module.exports = function (req, res, next) {
+function authMiddleware(req, res, next) {
   const token = req.cookies.token;
   if (!token) {
     return res.status(401).json({ message: 'Not authenticated' });
@@ -11,6 +10,8 @@ module.exports = function (req, res, next) {
     req.user = decoded;
     next();
   } catch (err) {
-    return res.status(401).json({ message: 'Invalid or expired token' });
+    res.status(401).json({ message: 'Invalid or expired token' });
   }
-};
+}
+
+module.exports = authMiddleware;

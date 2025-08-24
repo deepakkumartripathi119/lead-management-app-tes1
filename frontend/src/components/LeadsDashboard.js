@@ -4,7 +4,10 @@ import LeadModal from './LeadModal';
 import DeleteModal from './DeleteModal';
 import FilterPanel from './FilterPanel';
 
-const API_URL = process.env.REACT_APP_API_URL;
+
+const API_URL = process.env.URL_CHECK === 'localhost'
+  ? 'http://localhost:5000/api'
+  : process.env.REACT_APP_API_URL;
 
 export default function LeadsDashboard({ user, onLogout }) {
   const gridRef = useRef();
@@ -160,13 +163,18 @@ export default function LeadsDashboard({ user, onLogout }) {
         }
       });
     });
-    setRowData(filtered);
-    setPagination(p => ({
-      ...p,
-      total: filtered.length,
-      page: 1,
-      totalPages: Math.ceil(filtered.length / p.limit)
-    }));
+    // PAGINATION: Only show current page's leads
+    setPagination(p => {
+      const total = filtered.length;
+      const totalPages = Math.ceil(total / p.limit) || 1;
+      let page = p.page;
+      if (page > totalPages) page = totalPages;
+      if (page < 1) page = 1;
+      const startIdx = (page - 1) * p.limit;
+      const endIdx = startIdx + p.limit;
+      setRowData(filtered.slice(startIdx, endIdx));
+      return { ...p, total, totalPages, page };
+    });
   }, [allLeads, filters]);
 
 
@@ -176,7 +184,7 @@ export default function LeadsDashboard({ user, onLogout }) {
 
   useEffect(() => {
     applyFrontendFilters();
-  }, [filters, allLeads, applyFrontendFilters]);
+  }, [filters, allLeads, applyFrontendFilters, pagination.page, pagination.limit]);
 
   const handleFiltersChange = (newFilters) => {
     setFilters(newFilters);
@@ -258,7 +266,7 @@ export default function LeadsDashboard({ user, onLogout }) {
           className="btn btn--sm btn--outline" 
           onClick={onDelete}
           title="Delete Lead"
-          style={{ color: 'var(--color-error)' }}
+          style={{ color: 'var(--color-red-500)' }}
         >
           Del
         </button>
@@ -300,7 +308,16 @@ export default function LeadsDashboard({ user, onLogout }) {
   };
 
   // Narrower column definitions to fit all columns on screen
+  const SerialCellRenderer = (params) => {
+    // Calculate serial number based on page and index
+    const { pagination } = params.context;
+    return (
+      <span>{((pagination.page - 1) * pagination.limit) + (params.rowIndex + 1)}</span>
+    );
+  };
+
   const columnDefs = [
+    { headerName: 'S.No.', width: 60, cellRenderer: SerialCellRenderer, sortable: false, filter: false },
     { headerName: 'First', field: 'first_name', sortable: true, filter: false, width: 80 },
     { headerName: 'Last', field: 'last_name', sortable: true, filter: false, width: 80 },
     { headerName: 'Email', field: 'email', sortable: true, filter: false, width: 150 },
@@ -319,17 +336,46 @@ export default function LeadsDashboard({ user, onLogout }) {
   ];
 
   const handlePageChange = (newPage) => {
-    setPagination(p => ({ ...p, page: newPage }));
+    setPagination(p => {
+      let page = newPage;
+      if (page < 1) page = 1;
+      if (page > p.totalPages) page = p.totalPages;
+      return { ...p, page };
+    });
   };
 
   return (
     <div className="container">
-      <header className="header">
-        <div className="header-content">
-          <h1>Lead Management System</h1>
-          <div className="header-actions">
-            <span className="user-email">{user?.email}</span>
-            <button className="btn btn--secondary" onClick={onLogout}>
+      <header className="header" style={{ background: 'rgba(0,0,0,0.7)', borderBottom: '1px solid #222', padding: '10px 0' }}>
+        <div className="header-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <img src={process.env.PUBLIC_URL + '/logo1.png'} alt="Logo" style={{ width: 54, height: 54, verticalAlign: 'middle' }} />
+            <h1 style={{ margin: 0, color: '#2196F3', fontWeight: 700 }}>ManageLeads</h1>
+          </div>
+          <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span className="user-email" style={{ color: '#fff', fontWeight: 500 }}>{user?.email}</span>
+            <button
+              className="btn btn--secondary logout-btn"
+              style={{
+                background: '#FFD600',
+                color: '#222',
+                border: 'none',
+                fontWeight: 700,
+                transition: 'background 0.2s, color 0.2s',
+                padding: '8px 18px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+              }}
+              onMouseOver={e => {
+                e.currentTarget.style.background = '#FFEA70';
+                e.currentTarget.style.color = '#111';
+              }}
+              onMouseOut={e => {
+                e.currentTarget.style.background = '#FFD600';
+                e.currentTarget.style.color = '#222';
+              }}
+              onClick={onLogout}
+            >
               Logout
             </button>
           </div>
@@ -379,6 +425,7 @@ export default function LeadsDashboard({ user, onLogout }) {
                   ref={gridRef}
                   columnDefs={columnDefs}
                   rowData={rowData}
+                  context={{ pagination }}
                   pagination={false}
                   suppressPaginationPanel={true}
                   defaultColDef={{

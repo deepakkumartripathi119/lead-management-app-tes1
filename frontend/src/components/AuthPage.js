@@ -1,6 +1,9 @@
+
 import React, { useState } from 'react';
 
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = process.env.URL_CHECK === 'localhost'
+  ? 'http://localhost:5000/api'
+  : process.env.REACT_APP_API_URL;
 
 export default function AuthPage({ onLogin }) {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -8,70 +11,57 @@ export default function AuthPage({ onLogin }) {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLoginSubmit = async (e) => {
+  async function handleLoginSubmit(e) {
     e.preventDefault();
     setError('');
     setSuccess('');
     setLoading(true);
-
     const email = e.target.elements.loginEmail.value;
     const password = e.target.elements.loginPassword.value;
-
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const res = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-  credentials: 'include',
-        body: JSON.stringify({ email, password }),
+        credentials: 'include',
+        body: JSON.stringify({ email, password })
       });
-
-      if (response.status === 200) {
-        const userData = await response.json();
-        onLogin(userData); // Pass user data only, no token
+      if (res.status === 200) {
+        const userData = await res.json();
+        onLogin(userData);
       } else {
-        const data = await response.json();
-        if (response.status === 401) {
-          setError('Invalid email or password');
-        } else {
-          setError(data.message || 'Login failed');
-        }
+        const data = await res.json();
+        if (res.status === 401) setError('Invalid email or password');
+        else setError(data.message || 'Login failed');
       }
     } catch (err) {
       setError('Network error. Please try again.');
-  console.error('Login error:', err);
+      console.error('Login error:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const handleRegisterSubmit = async (e) => {
+  async function handleRegisterSubmit(e) {
     e.preventDefault();
     setError('');
     setSuccess('');
     setLoading(true);
-
     const email = e.target.elements.registerEmail.value;
     const password = e.target.elements.registerPassword.value;
-
     try {
-      const response = await fetch(`${API_URL}/auth/register`, {
+      const res = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password })
       });
-
-      if (response.status === 201) {
+      if (res.status === 201) {
         setSuccess('Registration successful! Please log in.');
         setIsRegistering(false);
       } else {
-        const data = await response.json();
-        if (response.status === 400) {
-          setError('Please check your email and password requirements');
-        } else if (response.status === 409) {
-          setError('Email already exists. Please use a different email.');
-        } else {
-          setError(data.message || 'Registration failed');
-        }
+        const data = await res.json();
+        if (res.status === 400) setError('Please check your email and password requirements');
+        else if (res.status === 409) setError('Email already exists. Please use a different email.');
+        else setError(data.message || 'Registration failed');
       }
     } catch (err) {
       setError('Network error. Please try again.');
@@ -79,20 +69,27 @@ export default function AuthPage({ onLogin }) {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
-    <div className="auth-container">
-      <div className="auth-form">
-        <div className="card">
-          <div className="card__body">
-            <h2>{isRegistering ? 'Create Account' : 'Welcome Back'}</h2>
-            
-            {error && <div className="error-message">{error}</div>}
-            {success && <div className="success-message">{success}</div>}
-
-            {!isRegistering ? (
-              <form onSubmit={handleLoginSubmit}>
+    <>
+      <header className="header" style={{ background: 'rgba(0,0,0,0.7)', borderBottom: '1px solid #222', padding: '10px 0' }}>
+        <div className="header-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <img src={process.env.PUBLIC_URL + '/logo1.png'} alt="Logo" style={{ width: 54, height: 54, verticalAlign: 'middle' }} />
+            <h1 style={{ margin: 0, color: '#2196F3', fontWeight: 700 }}>ManageLeads</h1>
+          </div>
+        </div>
+      </header>
+      <div className="auth-container">
+        <div className="auth-form">
+          <div className="card">
+            <div className="card__body">
+              <h2>{isRegistering ? 'Create Account' : 'Welcome Back'}</h2>
+              {error && <div className="error-message">{error}</div>}
+              {success && <div className="success-message">{success}</div>}
+              {!isRegistering ? (
+                <form onSubmit={handleLoginSubmit}>
                 <div className="form-group">
                   <label className="form-label">Email Address</label>
                   <input
@@ -195,5 +192,6 @@ export default function AuthPage({ onLogin }) {
         </div>
       </div>
     </div>
+    </>
   );
 }
