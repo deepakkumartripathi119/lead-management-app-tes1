@@ -1,10 +1,11 @@
 
-const cookieParser = require('cookie-parser');
+
 
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/auth.controller');
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 
 router.get('/me', authController.me);
 router.post('/register', authController.register);

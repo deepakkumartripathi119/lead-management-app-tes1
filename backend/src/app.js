@@ -2,8 +2,8 @@ const express = require('express');
 const cors = require('cors');
 
 const cookieParser = require('cookie-parser');
-const authRoutes = require('./api/routes/auth.routes.js');
-const leadRoutes = require('./api/routes/leads.routes.js');
+const authRoute = require('./api/routes/auth.routes.js');
+const leadRoute = require('./api/routes/leads.routes.js');
 
 const app = express();
 
@@ -19,8 +19,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 
 // API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/leads', leadRoutes);
+app.use('/api/auth', authRoute);
+app.use('/api/leads', leadRoute);
 
 // Simple root endpoint
 app.get('/', (req, res) => {
