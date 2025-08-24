@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import AuthPage from './components/AuthPage';
 import LeadsDashboard from './components/LeadsDashboard';
 
-const API_URL = ['https://lead-management-backend-xixm.onrender.com/','http://localhost:5000/api'];
+const API_URL = process.env.REACT_APP_API_URL;
 
 export default function App() {
     const [user, setUser] = useState(null);
