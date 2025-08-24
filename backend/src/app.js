@@ -9,7 +9,7 @@ const app = express();
 
 
 app.use(cors({
-  origin: ['https://lead-management-app1.vercel.app', 'http://localhost:3000'], 
+  origin: ['https://lead-management-app2.vercel.app', 'http://localhost:3000'], 
   credentials: true, 
 }));
 
