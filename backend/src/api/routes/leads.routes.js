@@ -2,6 +2,11 @@ const express = require('express');
 const router = express.Router();
 const leadsController = require('../controllers/leads.controller');
 
+const authMiddleware = require('../middleware/authMiddleware');
+
+// Protect all lead routes
+router.use(authMiddleware);
+
 router.route('/')
     .get(leadsController.getAllLeads)
     .post(leadsController.createLead);
