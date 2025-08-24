@@ -98,7 +98,7 @@ export default function LeadModal({ isOpen, onClose, onSave, lead, token }) {
                   name="last_name"
                   className="form-control"
                   value={formData.last_name}
-            
+                  onChange={handleChange}
                   required
                 />
               </div>
