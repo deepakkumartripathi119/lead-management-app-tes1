@@ -9,7 +9,7 @@ const app = express();
 
 
 app.use(cors({
-  origin: ['http://localhost:3000','https://lead-management-frontend1.onrender.com/'], 
+  origin: ['http://localhost:3000','https://lead-management-app1.vercel.app/'], 
   credentials: true, 
 }));
 
