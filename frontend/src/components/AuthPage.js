@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 const API_URL =
-  process.env.URL_CHECK === "localhost"
+  process.env.REACT_APP_URL_CHECK === "localhost"
     ? "http://localhost:5000/api"
     : process.env.REACT_APP_API_URL;
 
