@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 
-const API_URL =
-  process.env.REACT_APP_URL_CHECK === "localhost"
-    ? "http://localhost:5000/api"
-    : process.env.REACT_APP_API_URL;
+const API_URL =process.env.REACT_APP_API_URL;
 
 export default function AuthPage({ onLogin }) {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -25,7 +22,7 @@ export default function AuthPage({ onLogin }) {
         credentials: "include",
         body: JSON.stringify({ email, password }),
       });
-      if (res.status === 200) {
+      if (res.ok) {
         const userData = await res.json();
         onLogin(userData);
       } else {
@@ -54,7 +51,7 @@ export default function AuthPage({ onLogin }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      if (res.status === 201) {
+      if (res.ok) {
         setSuccess("Registration successful! Please log in.");
         setIsRegistering(false);
       } else {

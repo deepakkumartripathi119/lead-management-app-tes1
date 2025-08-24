@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
-export default function LeadModal({ isOpen, onClose, onSave, lead, token }) {
+export default function LeadModal({ isOpen, onClose, onSave, lead, token,onLogout }) {
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -35,7 +35,6 @@ export default function LeadModal({ isOpen, onClose, onSave, lead, token }) {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -53,7 +52,13 @@ export default function LeadModal({ isOpen, onClose, onSave, lead, token }) {
         credentials: 'include'
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Failed to save lead");
+      if (!response.ok) {
+        if (response.status === 401) {
+          onLogout && onLogout();
+          return;
+        }
+        throw new Error(data.message || "Failed to save lead");
+      }
       onSave();
     } catch (err) {
       setError(err.message);

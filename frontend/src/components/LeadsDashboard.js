@@ -5,9 +5,7 @@ import DeleteModal from './DeleteModal';
 import FilterPanel from './FilterPanel';
 
 
-const API_URL = process.env.URL_CHECK === 'localhost'
-  ? 'http://localhost:5000/api'
-  : process.env.REACT_APP_API_URL;
+const API_URL = process.env.REACT_APP_API_URL;
 
 export default function LeadsDashboard({ user, onLogout }) {
   const gridRef = useRef();
@@ -85,11 +83,11 @@ export default function LeadsDashboard({ user, onLogout }) {
       const response = await fetch(`${API_URL}/leads?page=1&limit=10000`, {
         credentials: 'include'
       });
-      if (response.status === 401) {
-        onLogout();
-        return;
-      }
       if (!response.ok) {
+        if (response.status === 401) {
+          onLogout();
+          return;
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
@@ -224,11 +222,11 @@ export default function LeadsDashboard({ user, onLogout }) {
         method: 'DELETE',
         credentials: 'include'
       });
-      if (response.status === 401) {
-        onLogout();
-        return;
-      }
       if (!response.ok) {
+        if (response.status === 401) {
+          onLogout();
+          return;
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       setIsDeleteModalOpen(false);
@@ -274,14 +272,23 @@ export default function LeadsDashboard({ user, onLogout }) {
     );
   };
 
+  const statusColorMap = {
+    new: 'info',
+    contacted: 'contacted',
+    qualified: 'qualified',
+    proposal: 'proposal',
+    won: 'success',
+    lost: 'error',
+    followup: 'followup',
+    unqualified: 'unqualified',
+    // fallback
+    default: 'warning',
+  };
   const StatusCellRenderer = (params) => {
     if (!params.value) return <span>-</span>;
-    const statusClass = `status status--${
-      params.value === 'new' ? 'info' : 
-      params.value === 'won' ? 'success' : 
-      params.value === 'lost' ? 'error' : 
-      'warning'
-    }`;
+    const key = params.value.toLowerCase();
+    const colorClass = statusColorMap[key] || statusColorMap.default;
+    const statusClass = `status status--${colorClass}`;
     return <span className={statusClass}>{params.value}</span>;
   };
 
