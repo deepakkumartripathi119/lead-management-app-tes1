@@ -7,6 +7,7 @@ router.route('/')
     .post(leadsController.createLead);
 
 router.route('/:id')
+    .get(leadsController.getLeadById)
     .put(leadsController.updateLead)
     .delete(leadsController.deleteLead);
 
