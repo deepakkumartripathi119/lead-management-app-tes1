@@ -9,8 +9,8 @@ const app = express();
 
 
 app.use(cors({
-  origin: ['http://localhost:3000','http://192.168.0.107:3000'], // or use process.env.FRONTEND_URL
-  credentials: true, // allow cookies to be sent
+  origin: ['http://localhost:3000',], 
+  credentials: true, 
 }));
 
 app.use(cookieParser());
