@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 
 
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL =
+  window.location.hostname === 'localhost'
+    ? 'http://localhost:5001/api'
+    : process.env.REACT_APP_API_URL;
 
 export default function LeadModal({ isOpen, onClose, onSave, lead, token,onLogout }) {
   const [formData, setFormData] = useState({});

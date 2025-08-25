@@ -78,12 +78,15 @@ exports.getAllLeads = async (req, res) => {
             }
         }
 
+        // Add user filter to query
+        query.user = req.user._id;
+        console.log('Filtering leads for user:', req.user._id);
+
         const data = await Lead.find(query)
             .sort({ createdAt: -1 })
             .limit(limit)
-            .skip((page - 1) * limit)
-            .exec();
-
+            .skip((page - 1) * limit);
+console.log("Leads",data);
         const total = await Lead.countDocuments(query);
         const totalPages = Math.ceil(total / limit);
 
@@ -102,11 +105,15 @@ exports.getAllLeads = async (req, res) => {
 // Create a new lead
 exports.createLead = async (req, res) => {
     try {
-        const {first_name, last_name, email, phone, company, city, state, source, status,score,lead_value} = req.body;
+        const {first_name, last_name, email, phone, company, city, state, source, status, score, lead_value} = req.body;
         if (!first_name||!last_name||!email||!phone||!company||!city||!state||!source||!status||!score||!lead_value) {
             return res.status(400).json({ message: 'Please provide all required fields' });
         }
-        const newLead = new Lead(req.body);
+        console.log('Creating lead for user:', req.user._id);
+        const newLead = new Lead({
+            ...req.body,
+            user: req.user._id
+        });
         const savedLead = await newLead.save();
         res.status(201).json(savedLead);
     } catch (error) {
@@ -117,7 +124,11 @@ exports.createLead = async (req, res) => {
 // Update an existing lead
 exports.updateLead = async (req, res) => {
     try {
-        const updatedLead = await Lead.findByIdAndUpdate(req.params.id, req.body, { 
+        console.log('Updating lead for user:', req.user._id);
+        const updatedLead = await Lead.findOneAndUpdate(
+            { _id: req.params.id, user: req.user._id },
+            { $set: req.body },
+            {
             new: true, // Return the modified document
             runValidators: true // Run schema validators on update
         });
@@ -133,7 +144,7 @@ exports.updateLead = async (req, res) => {
 // Delete a lead
 exports.deleteLead = async (req, res) => {
     try {
-        const lead = await Lead.findByIdAndDelete(req.params.id);
+        const lead = await Lead.findOneAndDelete({ _id: req.params.id, user: req.user._id });
         if (!lead) {
             return res.status(404).json({ message: 'Lead not found' });
         }
@@ -146,7 +157,7 @@ exports.deleteLead = async (req, res) => {
 // Fetch a single lead by ID
 exports.getLeadById = async (req, res) => {
     try {
-        const lead = await Lead.findById(req.params.id);
+        const lead = await Lead.findOne({ _id: req.params.id, user: req.user._id });
         if (!lead) {
             return res.status(404).json({ message: 'Lead not found' });
         }

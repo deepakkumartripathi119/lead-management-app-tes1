@@ -5,7 +5,10 @@ import DeleteModal from './DeleteModal';
 import FilterPanel from './FilterPanel';
 
 
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL =
+  window.location.hostname === 'localhost'
+    ? 'http://localhost:5001/api'
+    : process.env.REACT_APP_API_URL;
 
 export default function LeadsDashboard({ user, onLogout }) {
   const gridRef = useRef();
