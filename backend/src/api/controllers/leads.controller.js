@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Lead = require('../models/lead.model');
 
 exports.getAllLeads = async (req, res) => {
@@ -102,22 +103,60 @@ console.log("Leads",data);
     }
 };
 
-// Create a new lead
+
 exports.createLead = async (req, res) => {
     try {
-        const {first_name, last_name, email, phone, company, city, state, source, status, score, lead_value} = req.body;
-        if (!first_name||!last_name||!email||!phone||!company||!city||!state||!source||!status||!score||!lead_value) {
-            return res.status(400).json({ message: 'Please provide all required fields' });
+
+        const {
+            first_name,
+            last_name,
+            email,
+            phone,
+            company,
+            city,
+            state,
+            source,
+            status,
+            score,
+            lead_value,
+            is_qualified
+        } = req.body;
+
+    
+        if (!req.user || !req.user._id) {
+            console.error("FATAL: req.user not found in createLead. Middleware might be failing.");
+            return res.status(401).json({ message: 'Not authorized, user not found.' });
         }
-        console.log('Creating lead for user:', req.user._id);
-        const newLead = new Lead({
-            ...req.body,
-            user: req.user._id
-        });
+
+      
+        const leadData = {
+            first_name,
+            last_name,
+            email,
+            phone,
+            company,
+            city,
+            state,
+            source,
+            status,
+            score,
+            lead_value,
+            is_qualified,
+            user: req.user._id 
+        };
+
+        console.log("Data being sent to new Lead():", JSON.stringify(leadData, null, 2));
+
+        const newLead = new Lead(leadData);
+
         const savedLead = await newLead.save();
+
+        console.log("Lead saved successfully:", savedLead);
         res.status(201).json(savedLead);
+
     } catch (error) {
-        res.status(500).json({ message: 'Server Error', error: error.message });
+        console.error("ERROR in createLead:", error);
+        res.status(500).json({ message: 'Server Error', error: error.message, full_error: error });
     }
 };
 

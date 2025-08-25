@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 
+const PORT = (process.env.REACT_APP_URL_CHECK==='localhost')?5001:5000;
 const API_URL =
-  window.location.hostname === 'localhost'
-    ? 'http://localhost:5001/api'
+  process.env.REACT_APP_URL_CHECK==='localhost'
+    ? `http://localhost:${PORT}/api`
     : process.env.REACT_APP_API_URL;
+
 
 export default function AuthPage({ onLogin }) {
   const [isRegistering, setIsRegistering] = useState(false);

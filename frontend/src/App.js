@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import AuthPage from './components/AuthPage';
 import LeadsDashboard from './components/LeadsDashboard';
 
+const PORT = (process.env.REACT_APP_URL_CHECK==='localhost')?5001:5000;
 const API_URL =
-        window.location.hostname === 'localhost'
-            ? 'http://localhost:5001/api'
-        : process.env.REACT_APP_API_URL;
+  process.env.REACT_APP_URL_CHECK==='localhost'
+    ? `http://localhost:${PORT}/api`
+    : process.env.REACT_APP_API_URL;
+
 
 function App() {
     const [user, setUser] = useState(null);

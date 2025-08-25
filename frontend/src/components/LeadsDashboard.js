@@ -4,10 +4,10 @@ import LeadModal from './LeadModal';
 import DeleteModal from './DeleteModal';
 import FilterPanel from './FilterPanel';
 
-
+const PORT = (process.env.REACT_APP_URL_CHECK==='localhost')?5001:5000;
 const API_URL =
-  window.location.hostname === 'localhost'
-    ? 'http://localhost:5001/api'
+  process.env.REACT_APP_URL_CHECK==='localhost'
+    ? `http://localhost:${PORT}/api`
     : process.env.REACT_APP_API_URL;
 
 export default function LeadsDashboard({ user, onLogout }) {
@@ -94,6 +94,7 @@ export default function LeadsDashboard({ user, onLogout }) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
+     
       const leads = data.data || data.leads || [];
       setAllLeads(leads);
       setRowData(leads);
